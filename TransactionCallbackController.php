@@ -46,7 +46,10 @@ class TransactionCallbackController extends Controller
             if ($val === false) $val = "false";
         }
         $string = implode($values);
-        if (hash_hmac('sha512', $string, config('paymob.hmac_key'))) {
+        $calculated_hmac = hash_hmac('sha512', $string, config('paymob.hmac_key'));
+        $received_hmac =  $request->query('hmac');
+        $is_valid_hmac =  hash_equals($receivedHMAC, $calculatedHMAC);
+        if ($is_valid_hmac) {
             try {
                 $order = Payment::where('merchant_order_id', $request->obj['order']['merchant_order_id'])->firstOrFail();
                 $order->update([
